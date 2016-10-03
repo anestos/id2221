@@ -26,16 +26,12 @@ object KafkaWordCount {
     val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaConf, Set("avg"))
    
     val values = messages.map( s1 => s1._2)
-    val pairs = values.map(
-        
-            record =>
-            (record.toString.split(",")(0), record.toString.split(",")(1).toDouble)
-        )
+    val pairs = values.map(record =>
+            (record.toString.split(",")(0), record.toString.split(",")(1).toDouble))
     
-
     def mappingFunc(key: String, value: Option[Double], state: State[Double]): Option[(String, Double)] = {
 
-        val sum = (value.getOrElse(0.0) + state.getOption.getOrElse(0.0)) /2
+        val sum = (value.getOrElse(0.0) + state.getOption.getOrElse(value.getOrElse(0.0))) /2
         val output = (key, sum)
         state.update(sum)
         Option(output)
